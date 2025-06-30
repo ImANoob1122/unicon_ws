@@ -1,0 +1,19 @@
+{
+    "device_id": 0,
+    "reception_messages":
+    [
+        {
+            "id": 1,
+            "name": "odometry",
+            "type": "float32, float32, float32"
+        }
+    ],
+    "transmission_messages":
+    [
+        {
+            "id": 1,
+            "name": "odometry",
+            "type": "float32, float32, float32"
+        }
+    ]
+}
