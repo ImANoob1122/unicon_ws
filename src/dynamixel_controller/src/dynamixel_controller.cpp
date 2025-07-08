@@ -61,7 +61,7 @@ std::vector<uint8_t> escapeData(const std::vector<uint8_t>& data)
 }
 //--------------------------------------------------------------------
 
-DynamixelController::DynamixelController() : Node("dynamixel_controller") {
+DynamixelController::DynamixelController() : Node("dynamixel_controller_node") {
     RCLCPP_INFO(this->get_logger(), "DynamixelController node started.");
 
     // ポートハンドラ、パケットハンドラの初期化
