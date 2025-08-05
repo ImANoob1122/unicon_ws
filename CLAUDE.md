@@ -5,9 +5,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 This is a ROS2 workspace containing multiple packages for robotic control systems, including:
-- **Dynamixel Controller**: A ROS2 node for controlling Dynamixel servo motors
-- **RogiLink Flex**: A versatile communication library for UART-based device interaction
-- **STM32 HAL Integration**: Embedded firmware for STM32F4 microcontrollers with motor control capabilities
+- **Dynamixel Controller**: A ROS2 node for controlling Dynamixel servo motors with support for TTL/RS485 communication
+- **RogiLink Flex**: A versatile communication library for UART-based device interaction with JSON configuration
+- **UniconLink Flex**: A memory-mapped I/O communication system using variant-based data types
+- **STM32 HAL Integration**: Embedded firmware for STM32F446RE microcontrollers with motor control capabilities
 
 ## Build System
 
@@ -63,10 +64,32 @@ Generic communication library for UART devices with automatic data conversion an
 - `rogilink_flex_interfaces`: Message and service definitions
 - `rogilink_flex_gui`: GUI application for communication testing
 - `rogilink_flex_example_py`: Python usage examples
+- `rogilink_flex_lib`: Python library for RogiLink communication
 
 **Launch GUI:**
 ```bash
 ros2 launch rogilink_flex_gui gui.launch.py
+```
+
+### uniconlink_flex
+Location: `src/uniconlinkFlex/`
+
+Memory-mapped I/O communication system using variant-based data types for flexible microcontroller communication.
+
+**Components:**
+- `uniconlinkFlex`: Core C++ library with memory-mapped variables
+- `uniconlink_flex_interfaces`: Message and service definitions
+- `uniconlink_flex_example_py`: Python usage examples
+
+**Key Features:**
+- Supports bool, int32_t, float, string data types via std::variant
+- READ/WRITE/SYNC_READ/SYNC_WRITE operations
+- Callback support for hardware integration
+- Memory access control (READ_ONLY, WRITE_ONLY, READ_WRITE)
+
+**Run the node:**
+```bash
+ros2 run uniconlinkFlex uniconlinkFlex_node
 ```
 
 ### STM32 HAL Code
@@ -96,6 +119,15 @@ ros2 topic echo /dynamixel_rx
 
 # Test rogilink communication
 ros2 topic echo /rogilink_flex_frame
+
+# Test uniconlink communication
+ros2 topic echo /unicon_rx
+
+# List all active topics
+ros2 topic list
+
+# Monitor node status
+ros2 node list
 ```
 
 ### Code Organization
@@ -104,15 +136,18 @@ ros2 topic echo /rogilink_flex_frame
 - STM32 code uses HAL library with custom abstractions
 
 ### Communication Patterns
-- **Dynamixel**: Uses UInt8MultiArray messages on specific topics
-- **RogiLink**: Uses custom Frame messages with JSON configuration
-- **STM32**: Communicates via UART with custom protocol
+- **Dynamixel**: Uses UInt8MultiArray messages on `dynamixel_tx`/`dynamixel_rx` topics
+- **RogiLink**: Uses custom Frame messages with JSON configuration via `rogilink_flex_frame` topic
+- **UniconLink**: Uses UniconCommand/UniconResponse messages on `unicon_tx`/`unicon_rx` topics
+- **STM32**: Communicates via UART with custom protocol (RogiLink/UniconLink compatible)
 
 ## Key Files
 - `src/dynamixel_controller/src/dynamixel_controller.cpp`: Main Dynamixel node implementation
 - `src/rogilinkFlex-ros2/rogilink_flex/src/uart_node.cpp`: UART communication node
+- `src/uniconlinkFlex/src/uniconlink_flex_node.cpp`: UniconLink memory-mapped communication node
 - `hal_ws/ilias2025_differential_swerve_tester_hal/Src/main.cpp`: STM32 main application
 - `src/dynamixel_controller/config/bus_config.yaml`: Dynamixel device configuration
+- `src/rogilinkFlex-ros2/rogilink_flex/config/config.json`: RogiLink device configuration
 
 ## Development with Docker
 
@@ -159,11 +194,14 @@ claude --help
 
 ## Dependencies
 - ROS2 Humble
-- DynamixelSDK
-- nlohmann/json (for RogiLink)
+- DynamixelSDK (for Dynamixel servo control)
+- nlohmann/json (for RogiLink JSON configuration)
 - STM32 HAL libraries (for embedded code)
 - CppLinuxSerial (for UART communication)
 - Claude Code CLI (installed in container)
+- Python 3.10+ (for Python packages)
+- ament_cmake (for C++ packages)
+- rclcpp/rclpy (ROS2 client libraries)
 
 ## Hardware Configuration
 - Dynamixel servos: Connected via USB/TTL or RS485
