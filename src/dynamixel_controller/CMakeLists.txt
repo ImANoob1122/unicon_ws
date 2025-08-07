@@ -11,6 +11,7 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(dynamixel_sdk REQUIRED)
+find_package(uniconlink_flex_interfaces REQUIRED)
 
 # インクルードディレクトリの設定
 include_directories(
@@ -37,6 +38,7 @@ ament_target_dependencies(dynamixel_controller_node
   rclcpp
   std_msgs
   dynamixel_sdk
+  uniconlink_flex_interfaces
 )
 
 # 自動生成されたメッセージのためのリンク設定
