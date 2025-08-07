@@ -91,12 +91,17 @@ DynamixelController::DynamixelController() : Node("dynamixel_controller_node") {
 
     if (!port_handler_->openPort()) {
         RCLCPP_ERROR(this->get_logger(), "Failed to open port: %s", DEVICE_NAME);
+        rclcpp::shutdown();
+        return;
     } else {
         RCLCPP_INFO(this->get_logger(), "Port opened: %s", DEVICE_NAME);
     }
 
     if (!port_handler_->setBaudRate(BAUDRATE)) {
         RCLCPP_ERROR(this->get_logger(), "Failed to set baudrate: %d", BAUDRATE);
+        port_handler_->closePort();
+        rclcpp::shutdown();
+        return;
     } else {
         RCLCPP_INFO(this->get_logger(), "Baudrate set: %d", BAUDRATE);
     }

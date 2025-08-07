@@ -22,6 +22,11 @@ public:
         // Initialize example memory variables
         initialize_memory_variables();
         
+        // Create timer for periodic data publishing
+        periodic_timer_ = this->create_wall_timer(
+            std::chrono::milliseconds(1000),
+            std::bind(&UniconlinkFlexNode::publish_periodic_data, this));
+        
         RCLCPP_INFO(this->get_logger(), "UniconlinkFlex node initialized");
     }
     
@@ -154,8 +159,8 @@ private:
     }
     
     void publish_periodic_data() {
-        // Example: Publish current state of multiple variables
-        std::vector<uint32_t> indices = {0, 1, 2, 3, 4};
+        // Simulate periodic data from microcontroller
+        std::vector<uint32_t> indices = {0, 1, 3};
         
         try {
             std::vector<VariantType> values = memory_map_->read_multiple(indices);
@@ -174,35 +179,13 @@ private:
     std::unique_ptr<MemoryMap> memory_map_;
     rclcpp::Publisher<uniconlink_flex_interfaces::msg::UniconResponse>::SharedPtr response_publisher_;
     rclcpp::Subscription<uniconlink_flex_interfaces::msg::UniconCommand>::SharedPtr command_subscriber_;
+    rclcpp::TimerBase::SharedPtr periodic_timer_;
 };
 
 int main(int argc, char* argv[]) {
     rclcpp::init(argc, argv);
     
     auto node = std::make_shared<UniconlinkFlexNode>();
-    
-    // Create a timer to periodically publish data from microcontroller
-    auto timer = node->create_wall_timer(
-        std::chrono::milliseconds(1000),
-        [node]() {
-            // Simulate periodic data from microcontroller
-            std::vector<uint32_t> indices = {0, 1, 3};
-            try {
-                auto memory_map = node->get_memory_map();
-                std::vector<VariantType> values = memory_map->read_multiple(indices);
-                
-                auto response = uniconlink_flex_interfaces::msg::UniconResponse();
-                response.indices = indices;
-                response.values = VariantConverter::to_msg_vector(values);
-                
-                auto publisher = node->create_publisher<uniconlink_flex_interfaces::msg::UniconResponse>("unicon_rx", 10);
-                publisher->publish(response);
-                
-            } catch (const std::exception& e) {
-                RCLCPP_ERROR(node->get_logger(), "Error in periodic publish: %s", e.what());
-            }
-        }
-    );
     
     rclcpp::spin(node);
     rclcpp::shutdown();
