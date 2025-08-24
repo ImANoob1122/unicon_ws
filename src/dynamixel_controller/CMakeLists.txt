@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.22)
 project(dynamixel_controller)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -11,7 +11,6 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(dynamixel_sdk REQUIRED)
-find_package(uniconlink_flex_interfaces REQUIRED)
 
 # インクルードディレクトリの設定
 include_directories(
@@ -22,6 +21,8 @@ include_directories(
 # メッセージファイル設定
 set(msg_files
   "msg/DynamixelController.msg"
+  "msg/DynamixelCommand.msg"
+  "msg/DynamixelResponse.msg"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
@@ -38,7 +39,6 @@ ament_target_dependencies(dynamixel_controller_node
   rclcpp
   std_msgs
   dynamixel_sdk
-  uniconlink_flex_interfaces
 )
 
 # 自動生成されたメッセージのためのリンク設定
